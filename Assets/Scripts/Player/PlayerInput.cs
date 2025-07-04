@@ -1,22 +1,21 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class PlayerInput : MonoBehaviour
 {
     public UnityEvent<Vector2> OnMovementInput;
 
-    // Eventos separados
-    public UnityEvent OnAttackStarted;     // Quando mouse é pressionado
-    public UnityEvent OnAttackPerformed;   // Só se for um clique rápido
-    public UnityEvent OnAttackCanceled;    // Quando mouse é solto (pressionado ou não)
+    public UnityEvent OnAttackStarted;
+    public UnityEvent OnAttackPerformed; // clique rápido
+    public UnityEvent OnAttackCanceled;  // pressionado (ou apenas solto depois de tempo)
 
     [SerializeField] private InputActionReference movement, attack;
+    [SerializeField] private float clickThreshold = 0.05f;
 
-    [SerializeField] private float clickThreshold = 0.1f; // Máximo de tempo para ser considerado um clique
-
-    private float attackPressStartTime;
-    private bool waitingToCheckClick = false;
+    private Coroutine clickRoutine;
+    private int attackCanceledCount = 0;
 
     private void OnEnable()
     {
@@ -44,21 +43,27 @@ public class PlayerInput : MonoBehaviour
 
     private void HandleAttackStarted(InputAction.CallbackContext context)
     {
-        attackPressStartTime = Time.time;
-        waitingToCheckClick = true;
+        attackCanceledCount = 0;
+        if (clickRoutine != null)
+            StopCoroutine(clickRoutine);
+
+        clickRoutine = StartCoroutine(CheckClickRoutine());
         OnAttackStarted?.Invoke();
     }
 
     private void HandleAttackCanceled(InputAction.CallbackContext context)
     {
-        float heldDuration = Time.time - attackPressStartTime;
-
-        if (waitingToCheckClick && heldDuration < clickThreshold)
-        {
-            OnAttackPerformed?.Invoke(); // Real click
-        }
-
-        waitingToCheckClick = false;
+        attackCanceledCount++;
+        
         OnAttackCanceled?.Invoke();
+    }
+
+    private IEnumerator CheckClickRoutine()
+    {
+        yield return new WaitForSeconds(clickThreshold);
+        if (attackCanceledCount > 0)
+        {
+            OnAttackPerformed?.Invoke(); // Clique rápido
+        }
     }
 }

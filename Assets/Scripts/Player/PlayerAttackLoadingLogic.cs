@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerAttackLoadingLogic : MonoBehaviour
 {
     private SpriteRenderer swordSpriteRenderer;
-    private Animator swordLoadingAnimator;
+    [SerializeField] private Animator swordLoadingAnimator;
 
     private bool isLoading = false;
 
@@ -28,14 +28,16 @@ public class PlayerAttackLoadingLogic : MonoBehaviour
         if (isLoading) return;
         isLoading = true;
         swordSpriteRenderer.enabled = true; // Ativa o SpriteRenderer para mostrar a espada durante o carregamento
+        print("OIEEEEE");
         swordLoadingAnimator.SetBool("IsLoading", true);
+        swordLoadingAnimator.SetTrigger("Attack");
     }
 
     public void EndLoading()
     {
         if (!isLoading) return;
         isLoading = false;
-        swordLoadingAnimator.SetBool("IsLoading", false);
+        //swordLoadingAnimator.SetBool("IsLoading", false);
         swordSpriteRenderer.enabled = false; // Desativa o SpriteRenderer após o carregamento
     }
 }

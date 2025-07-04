@@ -19,10 +19,18 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
     [SerializeField] float dashDeAcceleration = 5f;
     [SerializeField] float dashCooldown = 1f; // Cooldown time in seconds
     [SerializeField] private float maxTimeLoad = 2f;
+    [SerializeField] private Transform attackOriginPoint; // Point from which the attack is initiated
 
     [Header("Attack Settings")]
     [SerializeField] private int attackDamage = 1; // Damage dealt by the attack dash
     [SerializeField] private float attackBaseTime = 2f; // Duration of the attack dash
+
+    [Header("Attack Detection Settings")]
+    public LayerMask damageableLayers;
+    public float radius;
+    //ANIMATOR
+
+    private Animator swordAnimator;
 
     private float elapsedTime = 0f; //keeps track of how long the attack is being charged
 
@@ -31,11 +39,6 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
     private bool isAttackOnCooldown = false; // Indicates if the attack is on cooldown
 
     private PlayerHitbox playerHitbox; // Reference to the PlayerHitbox component for invincibility frames
-
-    #region eventos
-    public UnityEvent OnAttackStart;
-    public UnityEvent OnAttackEnd;
-    #endregion
 
     //COROUTINES
     private Coroutine attackChargeCoroutine; //Garante que o jogador segurou o mouse, e não clicou apenas
@@ -57,6 +60,12 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
         if (playerHitbox == null)
         {
             Debug.LogError("PlayerHitbox não encontrado no objeto " + gameObject.name);
+        }
+
+        swordAnimator = GetComponent<Animator>();
+        if (swordAnimator == null)
+        {
+            Debug.LogError("Animator não encontrado no objeto " + gameObject.name);
         }
 
         dashSpeed = dashStartSpeed; // Initialize dashSpeed with the starting speed
@@ -121,7 +130,7 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
         if (!hasAttackEnded)
         {
             isAttackCharging = true; // Set the attack as charging
-            OnAttackStart?.Invoke(); // Trigger the attack start event
+            StartLoading();
         }
     }
 
@@ -141,7 +150,8 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
         {
             isAttackCharging = false;
             playerHitbox.StartAttackRotatingIFrames();
-            OnAttackEnd?.Invoke();
+            EndLoading();
+            PlaySwordAttackAnimation();
 
             Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
             Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
@@ -164,6 +174,58 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
 
         }
     }
+
+    public void StartLoading()
+    {
+        isAttackCharging = true;
+        PlayerMovment.canMove = false; // Disable player movement while loading the attack
+        swordAnimator.SetBool("IsLoading", true);
+    }
+
+    public void EndLoading()
+    {
+        isAttackCharging = false;
+        PlayerMovment.canMove = true; // Re-enable player movement after loading the attack
+        swordAnimator.SetBool("IsLoading", false);
+    }
+
+    public void PlaySwordAttackAnimation()
+    {
+        swordAnimator.SetBool("AttackEnded", false);
+        if (swordAnimator != null)
+        {
+            swordAnimator.SetTrigger("Attack");
+            StartCoroutine(OnAttackEnd());
+        }
+    }
+
+    private IEnumerator OnAttackEnd()
+    {
+        yield return new WaitForSeconds(getAttackTime());
+        swordAnimator.SetBool("AttackEnded", true);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Vector3 position = attackOriginPoint.position;
+        Gizmos.DrawWireSphere(position, radius);
+    }
+
+    public void DetectColliders()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackOriginPoint.position, radius, damageableLayers);
+
+        foreach (Collider2D collider in colliders)
+        {
+            Health health;
+            if (health = collider.GetComponent<Health>())
+            {
+                health.GetHit(attackDamage, transform.parent.gameObject); // Altera o valor de dano conforme necessário
+            }
+        }
+    }
+
 
     private IEnumerator AttackDashDelay()
     {

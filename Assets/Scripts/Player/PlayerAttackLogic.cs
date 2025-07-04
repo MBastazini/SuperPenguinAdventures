@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlayerAttackLogic : MonoBehaviour
 {
     private SpriteRenderer swordSpriteRenderer;
-    private Animator swordAnimator;
+    [SerializeField] private Animator swordAnimator;
     private IPlayerAttack currentAttackScript;
 
     [SerializeField] private int AttackType;
@@ -16,11 +16,6 @@ public class PlayerAttackLogic : MonoBehaviour
 
     void Awake()
     {
-        swordAnimator = GetComponent<Animator>();
-        if (swordAnimator == null)
-        {
-            Debug.LogError("Animator não encontrado no objeto da espada: " + gameObject.name);
-        }
 
         swordSpriteRenderer = GetComponent<SpriteRenderer>();
         if (swordSpriteRenderer == null)
@@ -78,6 +73,7 @@ public class PlayerAttackLogic : MonoBehaviour
     public void PlaySwordAttackAnimation()
     {
         swordAnimator.SetBool("AttackEnded", false);
+        swordAnimator.SetBool("IsLoading", true); // Certifique-se de que a animação de carregamento não esteja ativa
         // Ativa o SpriteRenderer para mostrar a espada durante o ataque
         if (swordSpriteRenderer != null)
         {

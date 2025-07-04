@@ -21,17 +21,18 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
     [Header("Attack Settings")]
     [SerializeField] private int attackDamage = 1; // Damage dealt by the attack dash
     [SerializeField] private float attackTime = 0.4f; // Duration of the attack dash
+    [SerializeField] private Transform attackOriginPoint; // Point from which the attack is initiated
 
+    [Header("Attack Detection Settings")]
+    public LayerMask damageableLayers;
+    public float radius;
 
+    private Animator swordAnimator; // Reference to the Animator component for attack animations
 
     private Vector2 boost = Vector2.zero;
     private bool isAttackDashOnCooldown = false;
 
     private PlayerHitbox playerHitbox; // Reference to the PlayerHitbox component for invincibility frames
-
-    #region eventos
-    public UnityEvent OnAttackInitiated;
-    #endregion
 
 
     private Coroutine attackCooldown;
@@ -52,6 +53,12 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
         if (playerHitbox == null)
         {
             Debug.LogError("PlayerHitbox não encontrado no objeto " + gameObject.name);
+        }
+
+        swordAnimator = GetComponent<Animator>();
+        if (swordAnimator == null)
+        {
+            Debug.LogError("Animator não encontrado no objeto " + gameObject.name);
         }
     }
 
@@ -96,9 +103,9 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
         //print("Attack!");
 
         // Trigger the attack dash initiated event
-        OnAttackInitiated?.Invoke(); // O '?' verifica se há assinantes antes de invocar
+        PlaySwordAttackAnimation();
 
-        if(attackCooldown != null)
+        if (attackCooldown != null)
         {
             StopCoroutine(attackCooldown);
             attackCooldown = null;
@@ -112,6 +119,43 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
         yield return new WaitForSeconds(dashCooldown);
         isAttackDashOnCooldown = false;
         //Debug.Log("Attack Dash cooldown ended.");
+    }
+
+    public void DetectColliders()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackOriginPoint.position, radius, damageableLayers);
+        foreach (Collider2D collider in colliders)
+        {
+            Health health;
+            if (health = collider.GetComponent<Health>())
+            {
+                health.GetHit(attackDamage, gameObject); // Altera o valor de dano conforme necessário
+            }
+        }
+    }
+
+    public void PlaySwordAttackAnimation()
+    {
+        swordAnimator.SetBool("AttackEnded", false);
+        if (swordAnimator != null)
+        {
+            // Supondo que você tenha um trigger no seu Animator chamado "Attack"
+            swordAnimator.SetTrigger("Attack");
+            StartCoroutine(OnAttackEnd());
+        }
+    }
+
+    private IEnumerator OnAttackEnd()
+    {
+        yield return new WaitForSeconds(attackTime);
+        swordAnimator.SetBool("AttackEnded", true);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Vector3 position = attackOriginPoint.position;
+        Gizmos.DrawWireSphere(position, radius);
     }
 
     public float getLoadedPercentage()

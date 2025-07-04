@@ -24,6 +24,7 @@ public class PlayerMovment : MonoBehaviour
     private Vector2 newMovment = Vector2.zero;
 
     public static Vector2 movmentBoost = Vector2.zero;
+    public static bool canMove = true;
 
     public Vector2 NewMovment { get => newMovment; set => newMovment = value; }
 
@@ -72,6 +73,11 @@ public class PlayerMovment : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (!canMove)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
         rb.linearVelocity = (playerMovment * speed) + movmentBoost;
     }
 
