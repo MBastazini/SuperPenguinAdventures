@@ -111,14 +111,22 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
             attackCooldown = null;
         }
 
-        attackCooldown = StartCoroutine(AttackDashDelay());
+        Action function = AttackDashDelay2;
+        GlobalCoroutineRunner.Instance.RunCoroutine(function, dashCooldown);
+
+        //attackCooldown = StartCoroutine(AttackDashDelay());
     }
 
-    private IEnumerator AttackDashDelay()
+    //private IEnumerator AttackDashDelay()
+    //{
+    //    yield return new WaitForSeconds(dashCooldown);
+    //    isAttackDashOnCooldown = false;
+    //    //Debug.Log("Attack Dash cooldown ended.");
+    //}
+
+    private void AttackDashDelay2()
     {
-        yield return new WaitForSeconds(dashCooldown);
         isAttackDashOnCooldown = false;
-        //Debug.Log("Attack Dash cooldown ended.");
     }
 
     public void DetectColliders()
@@ -141,13 +149,23 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
         {
             // Supondo que você tenha um trigger no seu Animator chamado "Attack"
             swordAnimator.SetTrigger("Attack");
-            StartCoroutine(OnAttackEnd());
+
+            Action function = OnAttackEnd2;
+
+            GlobalCoroutineRunner.Instance.RunCoroutine(function, attackTime);
+
+            //StartCoroutine(OnAttackEnd());
         }
     }
 
-    private IEnumerator OnAttackEnd()
+    //private IEnumerator OnAttackEnd()
+    //{
+    //    yield return new WaitForSeconds(attackTime);
+    //    swordAnimator.SetBool("AttackEnded", true);
+    //}
+
+    private void OnAttackEnd2()
     {
-        yield return new WaitForSeconds(attackTime);
         swordAnimator.SetBool("AttackEnded", true);
     }
 

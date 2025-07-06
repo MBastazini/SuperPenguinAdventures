@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8451719693770794307}
   - component: {fileID: 6676397163632562795}
   - component: {fileID: 6985164567113035140}
+  - component: {fileID: 6003927086978882596}
   m_Layer: 8
   m_Name: E_Knight
   m_TagString: Untagged
@@ -55,6 +56,7 @@ MonoBehaviour:
   rb: {fileID: 6985164567113035140}
   boxCollider: {fileID: 8216587384455633152}
   player: {fileID: 0}
+  enemyHealth: {fileID: 1266191678501925431}
 --- !u!114 &3967502142461603977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,6 +168,18 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &6003927086978882596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911472114752735096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b51ace28036fb04c83727d943e0e3eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1775341082175300067
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,6 +191,7 @@ GameObject:
   - component: {fileID: 9043316064895022398}
   - component: {fileID: 8216587384455633152}
   - component: {fileID: 1266191678501925431}
+  - component: {fileID: 6396371837096221767}
   m_Layer: 8
   m_Name: EnemyPlayerHitbox
   m_TagString: Untagged
@@ -289,8 +304,23 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnHeal:
+    m_PersistentCalls:
+      m_Calls: []
   isDead: 0
   invincibilityTime: 0.1
+--- !u!114 &6396371837096221767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775341082175300067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b51ace28036fb04c83727d943e0e3eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2399741519084483514
 GameObject:
   m_ObjectHideFlags: 0

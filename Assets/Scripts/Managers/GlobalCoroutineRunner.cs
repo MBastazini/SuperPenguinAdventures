@@ -14,11 +14,33 @@ public class GlobalCoroutineRunner : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject); // Opcional: persiste entre cenas
     }
 
     public void RunCoroutine(IEnumerator coroutine)
     {
         StartCoroutine(coroutine);
+    }
+
+    public void RunCoroutine(System.Action function, float delay)
+    {
+        StartCoroutine(RunDelayedRespectingPause(function, delay));
+    }
+
+    private IEnumerator RunDelayedRespectingPause(System.Action function, float delay)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < delay)
+        {
+            // Espera o jogo estar em Gameplay para contar o tempo
+            if (GameStateManager.Instance.CurrentGameState == GameState.Gameplay)
+            {
+                elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime ignora o Time.timeScale
+            }
+
+            yield return null;
+        }
+
+        function?.Invoke();
     }
 }

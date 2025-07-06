@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -170,7 +171,12 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
                 StopCoroutine(attackCooldown);
                 attackCooldown = null;
             }
-            attackCooldown = StartCoroutine(AttackDashDelay());
+
+
+            Action function = AttackDashDelay2;
+            GlobalCoroutineRunner.Instance.RunCoroutine(function, dashCooldown);
+
+            //attackCooldown = StartCoroutine(AttackDashDelay());
 
         }
     }
@@ -195,14 +201,24 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
         if (swordAnimator != null)
         {
             swordAnimator.SetTrigger("Attack");
-            StartCoroutine(OnAttackEnd());
+
+            Action function = OnAttackEnd2;
+
+            GlobalCoroutineRunner.Instance.RunCoroutine(function, getAttackTime());
+
+            //StartCoroutine(OnAttackEnd());
         }
     }
 
-    private IEnumerator OnAttackEnd()
+    //private IEnumerator OnAttackEnd()
+    //{
+    //    yield return new WaitForSeconds(getAttackTime());
+    //    swordAnimator.SetBool("AttackEnded", true);
+    //}
+
+    private void OnAttackEnd2()
     {
-        yield return new WaitForSeconds(getAttackTime());
-        swordAnimator.SetBool("AttackEnded", true);
+        swordAnimator.SetBool("AttackEnded", true); 
     }
 
     private void OnDrawGizmosSelected()
@@ -221,16 +237,21 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
             Health health;
             if (health = collider.GetComponent<Health>())
             {
-                health.GetHit(attackDamage, transform.parent.gameObject); // Altera o valor de dano conforme necessário
+                health.GetHit(attackDamage, gameObject); // Altera o valor de dano conforme necessário
             }
         }
     }
 
 
-    private IEnumerator AttackDashDelay()
+    //private IEnumerator AttackDashDelay()
+    //{
+    //    yield return new WaitForSeconds(dashCooldown);
+    //    isAttackOnCooldown = false; // Reset the cooldown after the specified time
+    //}
+
+    private void AttackDashDelay2()
     {
-        yield return new WaitForSeconds(dashCooldown);
-        isAttackOnCooldown = false; // Reset the cooldown after the specified time
+        isAttackOnCooldown = false;
     }
 
     public float getLoadedPercentage()
@@ -240,7 +261,7 @@ public class AttackRotating : MonoBehaviour, IPlayerAttack
 
     public float getAttackTime()
     {
-        return 2f + elapsedTime * 1.5f;
+        return attackBaseTime + elapsedTime * 1.5f;
     }
 
     public int getAttackDamage()

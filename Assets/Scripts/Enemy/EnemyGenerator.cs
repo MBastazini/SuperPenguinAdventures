@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class EnemyGenerator : MonoBehaviour
 {
@@ -11,6 +12,26 @@ public class EnemyGenerator : MonoBehaviour
     [Header("Configurações")]
     [SerializeField] private float spawnInterval = 2f;
     [SerializeField] private float spawnRadius = 50f; // Grande o suficiente para cobrir o mapa
+
+    [Header("Bonus")]
+    [SerializeField] private GameObject bonusPrefab;
+
+
+    [SerializeField] private UnityEvent<GameObject, Vector3> onEnemyDeath;
+
+
+    public bool canSpawnEnemys = true;
+
+
+    private void Awake()
+    {
+        GameStateManager.Instance.OnGameStateChanged += OnGameStateChange;
+    }
+
+    private void OnDestroy()
+    {
+        GameStateManager.Instance.OnGameStateChanged -= OnGameStateChange;
+    }
 
     private void Start()
     {
@@ -28,6 +49,10 @@ public class EnemyGenerator : MonoBehaviour
 
     private void TrySpawnEnemy()
     {
+        if(!canSpawnEnemys)
+        {
+            return;
+        }
         Vector2 spawnPosition;
 
         // Limite de tentativas para evitar loop infinito
@@ -53,6 +78,7 @@ public class EnemyGenerator : MonoBehaviour
         if (enemyScript != null)
         {
             enemyScript.SetPlayer(player);
+            enemyScript.SetEnemyOnDeathEvent(onEnemyDeath);
         }
         else
         {
@@ -63,5 +89,24 @@ public class EnemyGenerator : MonoBehaviour
     private bool IsInsideMap(Vector2 point)
     {
         return mapBoundaries.OverlapPoint(point);
+    }
+
+    public void SpawnPrefabWhenEnemyKilled(GameObject _, Vector3 position)
+    {
+        if (bonusPrefab == null)
+        {
+            Debug.LogWarning("bonusPrefab não está atribuído no EnemyGenerator.");
+            return;
+        }
+
+        //JOga um pouco mais pra cima
+        Vector3 adjustedPosition = position + new Vector3(0, 2f, 0);
+
+        Instantiate(bonusPrefab, adjustedPosition, Quaternion.identity);
+    }
+
+    void OnGameStateChange(GameState newGameState)
+    {
+        canSpawnEnemys = newGameState == GameState.Gameplay;
     }
 }

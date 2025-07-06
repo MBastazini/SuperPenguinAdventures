@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 
 public class Health : MonoBehaviour
 {
@@ -12,6 +14,7 @@ public class Health : MonoBehaviour
 
     public UnityEvent<GameObject> OnHitWithRefrence;
     public UnityEvent<GameObject, Vector3> OnDeathWithRefrenceAndPosition;
+    public UnityEvent OnHeal;
 
     [SerializeField]
     private bool isDead = false;
@@ -49,7 +52,7 @@ public class Health : MonoBehaviour
         if (currentHealth > 0)
         {
             OnHitWithRefrence?.Invoke(attacker);
-            StartCoroutine(StartInvincibility(invincibilityTime));
+            TriggerInvincibility(invincibilityTime);
         }
         else
         {
@@ -63,20 +66,30 @@ public class Health : MonoBehaviour
         }
     }
 
-    public IEnumerator StartInvincibility(float delay)
-    {
-        isInvincible = true;
+    //private IEnumerator StartInvincibility(float delay)
+    //{
+    //    isInvincible = true;
         
-        //print("START INVINCIBILITY");
+    //    //print("START INVINCIBILITY");
 
-        yield return new WaitForSeconds(delay);
+    //    yield return new WaitForSeconds(delay);
 
+    //    isInvincible = false;
+    //}
+
+    private void StartInvencibility2()
+    {
         isInvincible = false;
     }
 
     public void TriggerInvincibility(float duration)
     {
-        StartCoroutine(StartInvincibility(duration));
+        isInvincible = true;
+        Action function = StartInvencibility2;
+
+        GlobalCoroutineRunner.Instance.RunCoroutine(function, duration);
+
+        //StartCoroutine(StartInvincibility(duration));
     }
 
 
@@ -88,5 +101,18 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
+        OnHeal?.Invoke();
     }
+
+    public int[] GetHealthAndMaxHealth()
+    {
+        return new int[] { currentHealth, maxHealth };
+    }
+
+
+    public void SetOnDeathEvent(UnityEvent<GameObject, Vector3> newEvent)
+    {
+        OnDeathWithRefrenceAndPosition = newEvent;
+    }
+
 }

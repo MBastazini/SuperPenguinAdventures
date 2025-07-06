@@ -10,6 +10,8 @@ public class EnemyScript : MonoBehaviour
     [SerializeField] private BoxCollider2D boxCollider;
     [SerializeField] private GameObject player;
 
+    [SerializeField] private Health enemyHealth;
+
     #endregion
 
 
@@ -27,6 +29,17 @@ public class EnemyScript : MonoBehaviour
     {
         player = playerRef;
     }
+
+    public void SetEnemyOnDeathEvent(UnityEngine.Events.UnityEvent<GameObject, Vector3> onDeathEvent)
+    {
+        if(enemyHealth == null)
+        {
+            Debug.LogError("Health component not found on " + gameObject.name);
+            return;
+        }
+        enemyHealth.SetOnDeathEvent(onDeathEvent);
+    }
+
 
     public bool IsMouseOver()
     {

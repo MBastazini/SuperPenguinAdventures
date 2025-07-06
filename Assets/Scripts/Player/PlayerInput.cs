@@ -7,32 +7,38 @@ public class PlayerInput : MonoBehaviour
 {
     public UnityEvent<Vector2> OnMovementInput;
 
+    [SerializeField] GameObject pauseMenu;
+
     public UnityEvent OnAttackStarted;
     public UnityEvent OnAttackPerformed; // clique rápido
     public UnityEvent OnAttackCanceled;  // pressionado (ou apenas solto depois de tempo)
+    public UnityEvent OnPause;
 
-    [SerializeField] private InputActionReference movement, attack;
-    [SerializeField] private float clickThreshold = 0.05f;
+    [SerializeField] private InputActionReference movement, attack, pause;
+    private float clickTrashhold = 0.1f;
 
-    private Coroutine clickRoutine;
-    private int attackCanceledCount = 0;
+    private float attackStartTime;
 
     private void OnEnable()
     {
         movement.action.Enable();
         attack.action.Enable();
+        pause.action.Enable();
 
         attack.action.started += HandleAttackStarted;
         attack.action.canceled += HandleAttackCanceled;
+        pause.action.performed += HandlePause;
     }
 
     private void OnDisable()
     {
         movement.action.Disable();
         attack.action.Disable();
+        pause.action.Disable();
 
         attack.action.started -= HandleAttackStarted;
         attack.action.canceled -= HandleAttackCanceled;
+        pause.action.performed -= HandlePause;
     }
 
     private void Update()
@@ -43,27 +49,23 @@ public class PlayerInput : MonoBehaviour
 
     private void HandleAttackStarted(InputAction.CallbackContext context)
     {
-        attackCanceledCount = 0;
-        if (clickRoutine != null)
-            StopCoroutine(clickRoutine);
-
-        clickRoutine = StartCoroutine(CheckClickRoutine());
         OnAttackStarted?.Invoke();
+        attackStartTime = Time.time;
     }
 
     private void HandleAttackCanceled(InputAction.CallbackContext context)
     {
-        attackCanceledCount++;
-        
+        float attackDuration = Time.time - attackStartTime;
+
+        if (attackDuration < clickTrashhold)
+        {
+            OnAttackPerformed?.Invoke();
+        }
         OnAttackCanceled?.Invoke();
     }
 
-    private IEnumerator CheckClickRoutine()
+    private void HandlePause(InputAction.CallbackContext context)
     {
-        yield return new WaitForSeconds(clickThreshold);
-        if (attackCanceledCount > 0)
-        {
-            OnAttackPerformed?.Invoke(); // Clique rápido
-        }
+        OnPause?.Invoke();
     }
 }
