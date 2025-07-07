@@ -24,6 +24,8 @@ public class Health : MonoBehaviour
     [SerializeField] private float invincibilityTime = 0.1f; // tempo em segundos
     private bool isInvincible = false;
 
+    [SerializeField] private AudioClip hitSound;
+
     //You can check if attacker layer is the same as gameObject layer if needed
 
     public void Awake()
@@ -48,6 +50,10 @@ public class Health : MonoBehaviour
         //print("GETHIT");
 
         currentHealth -= amount;
+        if(hitSound != null)
+        {
+            SoundFXManager._instance.PlaySoundFXClip(hitSound, transform, 1f);
+        }
 
         if (currentHealth > 0)
         {
@@ -57,6 +63,7 @@ public class Health : MonoBehaviour
         else
         {
             Vector3 deathPosition = entity != null ? entity.transform.position : Vector3.zero;
+            Debug.Log("INVOCA CARALHOOOOOOOOOOOO");
             OnDeathWithRefrenceAndPosition?.Invoke(attacker, deathPosition);
             isDead = true;
             if (entity != null)

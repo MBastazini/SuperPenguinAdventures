@@ -8,7 +8,9 @@ public class ItemDropper : MonoBehaviour
 
     public void TryDropItem(GameObject killer, Vector3 deathPosition)
     {
+        Debug.Log("Tentando dropar item...");
         if (killer == null || possibleDrops == null || possibleDrops.Length == 0) return;
+        Debug.Log("NIGGANIGGANIGGA");
 
         if (dropChance < 0f || dropChance > 1f)
         {
@@ -30,5 +32,10 @@ public class ItemDropper : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         Instantiate(item, position, Quaternion.identity);
+    }
+
+    public void NiggaNigga()
+    {
+        Debug.Log("NIGGANIGGANIGGA");
     }
 }

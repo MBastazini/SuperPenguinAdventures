@@ -27,6 +27,9 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
     public LayerMask damageableLayers;
     public float radius;
 
+    [Header("Sound Effects")]
+    [SerializeField] private AudioClip attackSound; // Sound played when the attack is initiated
+
     private Animator swordAnimator; // Reference to the Animator component for attack animations
 
     private Vector2 boost = Vector2.zero;
@@ -169,6 +172,10 @@ public class AttackDash : MonoBehaviour, IPlayerAttack
         swordAnimator.SetBool("AttackEnded", true);
     }
 
+    public void PlaySoundEffectOnLoop()
+    {
+        SoundFXManager._instance.PlaySoundFXClip(attackSound, attackOriginPoint, 1f);
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
